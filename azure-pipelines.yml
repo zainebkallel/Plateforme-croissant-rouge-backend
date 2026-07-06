@@ -34,7 +34,7 @@ steps:
 # =========================
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: 'YOUR_SONAR_SERVICE_CONNECTION'
+    SonarQube: 'sonarqube-connection'
     scannerMode: 'Other'
     extraProperties: |
       sonar.projectKey=croissant-rouge
@@ -55,7 +55,7 @@ steps:
 # =========================
 - task: Docker@2
   inputs:
-    containerRegistry: 'DOCKERHUB_SERVICE_CONNECTION'
+    containerRegistry: 'dockerhub-connection'
     repository: $(dockerHubRepo)
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
