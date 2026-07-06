@@ -6,7 +6,7 @@ pool:
 
 variables:
   imageName: 'croissant-rouge-app'
-  dockerHubRepo: 'YOUR_DOCKERHUB_USERNAME/croissant-rouge-app'
+  dockerHubRepo: 'zainebkallel/croissant-rouge-app'
 
 steps:
 
