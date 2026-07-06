@@ -1,0 +1,64 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'croissant-rouge-app'
+  dockerHubRepo: 'YOUR_DOCKERHUB_USERNAME/croissant-rouge-app'
+
+steps:
+
+# =========================
+# 1. Install Java
+# =========================
+- task: JavaToolInstaller@0
+  inputs:
+    versionSpec: '17'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+
+# =========================
+# 2. Maven Build + Tests
+# =========================
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'clean test package'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+# =========================
+# 3. SonarQube Analysis
+# =========================
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'YOUR_SONAR_SERVICE_CONNECTION'
+    scannerMode: 'Other'
+    extraProperties: |
+      sonar.projectKey=croissant-rouge
+      sonar.projectName=Croissant Rouge Project
+      sonar.java.binaries=target
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'sonar:sonar'
+
+- task: SonarQubePublish@5
+  inputs:
+    pollingTimeoutSec: '300'
+
+# =========================
+# 4. Build Docker Image
+# =========================
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DOCKERHUB_SERVICE_CONNECTION'
+    repository: $(dockerHubRepo)
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      latest
+      $(Build.BuildId)
